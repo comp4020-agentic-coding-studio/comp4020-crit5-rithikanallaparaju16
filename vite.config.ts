@@ -6,7 +6,18 @@ import { defineConfig } from "vite";
 // hand-written site needs no build config: add pages, link them, ship.
 // (Vite's default would build only the root index.html and silently drop the
 // rest from dist/ — fine locally, 404s deployed.)
-const SKIP = new Set(["node_modules", "dist", "spec", "scripts", "reflections"]);
+// `stitch_lunar_gravity_racer` is a Stitch design export whose per-screen
+// `code.html` mockups would otherwise each build into dist/ and deploy as a
+// real page. .gitignore alone does not stop that --- vite reads the
+// filesystem, not git --- so the directory is named here as well.
+const SKIP = new Set([
+  "node_modules",
+  "dist",
+  "spec",
+  "scripts",
+  "reflections",
+  "stitch_lunar_gravity_racer",
+]);
 
 function htmlEntries(dir = "."): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {

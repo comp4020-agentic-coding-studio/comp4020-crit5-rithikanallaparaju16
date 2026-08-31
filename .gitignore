@@ -20,3 +20,8 @@ mise.local.toml
 # your course API key, and this repo goes public when you ship. Your tracked
 # harness is CLAUDE.md (and any AGENTS.md), not this directory.
 .claude/
+
+# Design exports: 5MB of Stitch mockups, kept locally as reference but not
+# shipped. Also named in vite.config.ts SKIP --- ignoring alone would still
+# let the build turn each code.html into a deployed page.
+stitch_lunar_gravity_racer/
