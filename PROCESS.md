@@ -59,7 +59,7 @@ tests, last week's `PROCESS.md` and reflection.
 **Open:** stack for the week, and how much of crit 4's convention block
 generalises. Harness merge not done yet.
 
-**Commits:** _pending_
+**Commits:** [`7dce521`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-rithikanallaparaju16/commit/7dce521)
 
 ### 1 — a running record of prompts and commits
 
@@ -87,7 +87,7 @@ marker is still in the file, and on a missing `reflections/crit-5.md` --- and
 the first draft of this very entry tripped the first of those by quoting the
 sentinel it greps for, which is now a rule in `CLAUDE.md`.
 
-**Commits:** _pending_
+**Commits:** [`514bcd8`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-rithikanallaparaju16/commit/514bcd8)
 
 ### 2 — the checks went red before any code was written
 
@@ -118,7 +118,7 @@ the 20 failures.
 deployed page, that `.gitignore` is not the fix, and that `.png` mockups are safe
 where `.html` is not.
 
-**Commits:** _pending_
+**Commits:** [`7dce521`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-rithikanallaparaju16/commit/7dce521)
 
 ### 3 — the game brief
 
@@ -175,7 +175,7 @@ the way a pedal or a dial is labelled, and the test enforces that nothing tells
 the player what to *do*. That is a defensible line, not a settled one, and the
 pod is what settles it.
 
-**Commits:** _pending_
+**Commits:** [`198491b...a2787c3`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-rithikanallaparaju16/compare/198491b...a2787c3)
 
 ### 4 — the rover did not move if you did nothing
 
@@ -202,7 +202,7 @@ hill, which is itself the prompt to act; naive full-throttle finishes 2 runs in
 `spec/game.test.ts` now drives the physics headlessly and fails if the course
 stops being winnable, stops being losable, or stops ending inside five minutes.
 
-**Commits:** _pending_
+**Commits:** [`a2787c3...f112bd1`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-rithikanallaparaju16/compare/a2787c3...f112bd1)
 
 ### 5 — what the screenshots caught that the code did not
 
@@ -231,4 +231,4 @@ rendered from the running game by `scripts/make-card.mjs` for the same reason.
 -orientation rule are both in `CLAUDE.md`, along with the two marking viewports
 written down as numbers.
 
-**Commits:** _pending_
+**Commits:** [`a2787c3...f112bd1`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-rithikanallaparaju16/compare/a2787c3...f112bd1)
