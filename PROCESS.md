@@ -247,6 +247,40 @@ to `outcome()` was computed from wheel positions projected through
 `atan2` returned a ground angle near PI, and `angle - groundAngle` cancelled to
 **zero**. A rover on its roof reported no lean at all.
 
+**The bug, precisely.** One line, in `src/physics.ts`. The wheel sample points
+were projected through the chassis angle:
+
+```ts
+const xFront = r.x + Math.cos(r.angle) * (WHEELBASE / 2);
+const xRear  = r.x - Math.cos(r.angle) * (WHEELBASE / 2);
+const groundAngle = Math.atan2(yFront - yRear, xFront - xRear);   // <-- the bug
+```
+
+Past vertical `Math.cos(r.angle)` goes negative, so `xFront` lands to the *left*
+of `xRear`. `atan2` is then handed a negative run, returns a ground angle near
+PI, and `normalise(angle - groundAngle)` subtracts the rover's own inversion
+from itself. Measured on flat ground, where the true ground angle is 0:
+
+| chassis angle | old `groundAngle` | old tilt | flagged? | fixed tilt | flagged? |
+| --- | --- | --- | --- | --- | --- |
+| 0 deg | 0 deg | 0 deg | no | 0 deg | no |
+| 144 deg | 180 deg | -36 deg | **no** | 144 deg | yes |
+| 180 deg, on its roof | 180 deg | **0 deg** | **no** | 180 deg | yes |
+
+So `outcome()` was asked whether a rover leaning 0 degrees had crashed, and
+correctly answered no.
+
+The second half is worse than "the run does not end". The snap that keeps the
+chassis hugging the slope is gated on that same tilt being small --- so it ran,
+lerping the rover's angle *towards* the phantom 180-degree ground. The code was
+actively holding the rover upside down and treating it as correctly seated,
+while thrust kept being applied along the real terrain tangent. It did not
+merely fail to notice the flip; it drove on, inverted and stable, indefinitely.
+
+The fix samples the ground at a fixed left-right pair, `r.x - WHEELBASE / 2` to
+`r.x + WHEELBASE / 2`, so the run handed to `atan2` is always `+WHEELBASE` and
+the ground angle can never depend on which way the chassis points.
+
 **Instead of:** patching the number, I wrote the failing test first --- one that
 drops the rover from 40 m at various angles and asserts the *ending* rather than
 the predicate. It went red on the two inverted cases and green on the wheels-down
