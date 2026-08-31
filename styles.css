@@ -1,16 +1,316 @@
-body {
+/* Tokens lifted from the Stitch design export ("Cosmic Velocity"): deep
+   indigo void, cosmic purple for actions, neon cyan for anything live. Rubik
+   for display and HUD, Inter for prose, JetBrains Mono for the small caps
+   labels. Marks only -- there is no instructional copy in this file's content. */
+:root {
+  --surface: #10131a;
+  --surface-container: #1d2026;
+  --surface-container-high: #272a31;
+  --on-surface: #e1e2eb;
+  --on-surface-variant: #ccc3d7;
+  --outline: #958da1;
+  --primary: #d3bbff;
+  --primary-container: #6d28d9;
+  --on-primary: #3f008d;
+  --secondary: #5de6ff;
+  --fuel: #7bf59b;
+  --fuel-low: #ffb4ab;
+
+  --r-md: 0.75rem;
+  --r-lg: 1rem;
+  --r-full: 9999px;
+  --gutter: 16px;
+  --safe: 20px;
+  --touch: 44px;
+
+  --display: "Rubik", system-ui, sans-serif;
+  --body: "Inter", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
   margin: 0;
-  padding: 2rem;
-  font-family: system-ui, sans-serif;
-  line-height: 1.6;
-  color: #1a1a1a;
+  height: 100%;
+  overflow: hidden;
+  background: var(--surface);
+  color: var(--on-surface);
+  font-family: var(--body);
+  /* A game that pans the view should never also rubber-band the page. */
+  overscroll-behavior: none;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-main {
-  max-width: 40rem;
-  margin: 0 auto;
+#stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-a {
-  color: #0b5fff;
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.cap {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+
+/* ---------------------------------------------------------------- chrome */
+.wordmark {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 6px;
+  z-index: 3;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.4;
+}
+.wordmark a { color: var(--on-surface-variant); text-decoration: none; }
+.wordmark a:hover { color: var(--secondary); }
+
+/* ------------------------------------------------------------------- hud */
+.hud {
+  position: fixed;
+  top: max(var(--safe), env(safe-area-inset-top));
+  left: var(--safe);
+  right: var(--safe);
+  z-index: 2;
+  display: flex;
+  gap: var(--gutter);
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+.readout {
+  background: color-mix(in srgb, var(--surface-container) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--outline) 26%, transparent);
+  border-radius: var(--r-lg);
+  padding: 8px 14px;
+  backdrop-filter: blur(10px);
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.readout strong {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--secondary);
+  font-variant-numeric: tabular-nums;
+}
+.readout[data-testid="destination"] { margin-left: auto; text-align: right; }
+.readout[data-testid="destination"] strong { color: var(--on-surface); font-size: 15px; }
+.readout.fuel { flex: 1 1 auto; max-width: 260px; }
+
+.bar {
+  height: 9px;
+  border-radius: var(--r-full);
+  background: color-mix(in srgb, #000 45%, transparent);
+  overflow: hidden;
+  min-width: 84px;
+}
+.bar.thin { height: 5px; }
+.bar i {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-full);
+  background: var(--fuel);
+  transition: width 120ms linear, background-color 300ms ease;
+}
+.bar i[data-bind="progress"] { background: var(--primary); }
+.readout.fuel[data-low="true"] .bar i { background: var(--fuel-low); }
+.readout.fuel[data-low="true"] { animation: pulse 900ms ease-in-out infinite; }
+@keyframes pulse { 50% { border-color: var(--fuel-low); } }
+
+/* ------------------------------------------------------------------ fact */
+.fact {
+  position: fixed;
+  left: var(--safe);
+  right: var(--safe);
+  bottom: calc(var(--safe) + 108px);
+  z-index: 2;
+  max-width: 340px;
+  padding: 12px 14px;
+  border: 1px solid var(--secondary);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--surface-container) 92%, transparent);
+  backdrop-filter: blur(10px);
+  font-size: 14px;
+  line-height: 1.45;
+  display: grid;
+  gap: 3px;
+  pointer-events: none;
+  animation: rise 400ms ease both;
+}
+.fact[hidden] { display: none; }
+.fact strong { color: var(--secondary); font-family: var(--display); }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+
+/* ---------------------------------------------------------------- pedals */
+.pedals {
+  position: fixed;
+  left: var(--safe);
+  right: var(--safe);
+  bottom: max(var(--safe), env(safe-area-inset-bottom));
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.pedal {
+  pointer-events: auto;
+  width: 92px;
+  height: 92px;
+  min-width: var(--touch);
+  min-height: var(--touch);
+  border-radius: var(--r-full);
+  display: grid;
+  place-items: center;
+  gap: 1px;
+  font: inherit;
+  cursor: pointer;
+  color: var(--on-surface);
+  border: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  background: radial-gradient(circle at 50% 30%, var(--surface-container-high), #241a3d);
+  /* Bottom-heavy shadow, per the design export: the button looks like it has
+     height, so it looks pressable. That is the whole tutorial. */
+  box-shadow: 0 5px 0 #150e26, 0 0 22px color-mix(in srgb, var(--primary) 22%, transparent);
+  transition: transform 70ms ease, box-shadow 70ms ease;
+}
+.pedal svg { width: 30px; height: 30px; }
+.pedal.gas {
+  color: #fff;
+  border-color: var(--primary);
+  background: radial-gradient(circle at 50% 25%, #8b48f0, var(--primary-container));
+  box-shadow: 0 5px 0 #3b0f86, 0 0 30px color-mix(in srgb, var(--primary) 45%, transparent);
+  width: 104px;
+  height: 104px;
+}
+.pedal.gas .cap { color: color-mix(in srgb, #fff 82%, transparent); }
+.pedal[data-down="true"] {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #150e26;
+}
+.pedal.gas[data-down="true"] { box-shadow: 0 1px 0 #3b0f86, 0 0 34px var(--primary); }
+.pedal:focus-visible { outline: 3px solid var(--secondary); outline-offset: 3px; }
+
+/* --------------------------------------------------------------- screens */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 22px;
+  padding: var(--safe);
+  text-align: center;
+  background: radial-gradient(circle at 50% 42%, #1d1a2e 0%, #10131a 68%);
+}
+.screen[hidden] { display: none; }
+
+.opening h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(38px, 11vw, 68px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--secondary);
+  text-shadow: 0 0 26px color-mix(in srgb, var(--secondary) 55%, transparent);
+}
+.hero {
+  width: min(70vw, 340px);
+  height: auto;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.55));
+  animation: bob 3.6s ease-in-out infinite;
+}
+@keyframes bob { 50% { transform: translateY(-9px) rotate(-1.5deg); } }
+
+.primary {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--on-primary);
+  background: var(--primary);
+  border: 0;
+  border-radius: var(--r-lg);
+  padding: 18px 46px;
+  min-height: var(--touch);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #7331df, 0 0 34px color-mix(in srgb, var(--primary) 40%, transparent);
+  transition: transform 80ms ease, box-shadow 80ms ease;
+  animation: breathe 2.4s ease-in-out infinite;
+}
+.primary svg { width: 22px; height: 22px; }
+.primary:hover { transform: translateY(-1px); }
+.primary:active { transform: translateY(4px); box-shadow: 0 1px 0 #7331df; }
+.primary:focus-visible { outline: 3px solid var(--secondary); outline-offset: 4px; }
+@keyframes breathe {
+  50% { box-shadow: 0 5px 0 #7331df, 0 0 52px color-mix(in srgb, var(--primary) 70%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero, .primary, .readout.fuel { animation: none; }
+}
+
+.over { background: color-mix(in srgb, #10131a 82%, transparent); backdrop-filter: blur(14px); }
+.verdict {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(30px, 9vw, 52px);
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: var(--primary);
+}
+.tally { margin: 0; display: flex; gap: 12px; align-items: baseline; }
+.tally strong {
+  font-family: var(--display);
+  font-size: 26px;
+  color: var(--secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Phase gating: the opening screen is the only thing on screen at the start,
+   so there is exactly one thing to do. */
+body[data-phase="opening"] .hud,
+body[data-phase="opening"] .pedals,
+body[data-phase="opening"] .wordmark,
+body[data-phase="intro"] .pedals,
+body[data-phase="intro"] .hud,
+body[data-phase="over"] .pedals { visibility: hidden; }
+
+/* Desktop: the marking viewport is 1920x1080, so the pedals go where thumbs
+   would be on a controller and the HUD stays out of the play area. */
+@media (min-width: 900px) {
+  :root { --safe: 32px; }
+  .pedal { width: 104px; height: 104px; }
+  .pedal.gas { width: 116px; height: 116px; }
+  .fact { bottom: calc(var(--safe) + 148px); max-width: 380px; }
 }

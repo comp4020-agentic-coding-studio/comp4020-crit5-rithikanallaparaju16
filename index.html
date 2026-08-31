@@ -2,37 +2,103 @@
 <html lang="en-AU">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>COMP4020 prototype</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Astro Rover</title>
     <meta
       name="description"
-      content="Replace this with one sentence saying what this page is. A search result and a link preview both show it."
+      content="Drive a little rover across the Moon under real lunar gravity. Crater rims launch you, air time scores, and the fuel is always running out."
     />
 
     <!--
-      The link-preview card: public/card.png, 1200x630 --- replace it. The URL
-      resolves against this page, like any link. No og:title/og:description:
-      scrapers fall back to the <title> and description above.
+      The link-preview card: public/card.png, 1200x630. The URL resolves
+      against this page, like any link. No og:title/og:description: scrapers
+      fall back to the <title> and description above.
     -->
     <meta property="og:type" content="website" />
     <meta property="og:image" content="./card.png" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#10131a" />
 
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;800&family=Inter:wght@500;600&family=JetBrains+Mono:wght@700&display=swap"
+      rel="stylesheet"
+    />
   </head>
-  <body>
-    <header>
-      <nav aria-label="Primary">
-        <a href="./">Home</a>
-      </nav>
-    </header>
-    <main>
-      <h1>COMP4020 prototype</h1>
-      <p>
-        Replace this with your prototype. This week's brief is on the course website;
-        <code>spec/README.md</code> explains how the checks in this repo relate to it.
-      </p>
-    </main>
+  <body data-phase="opening">
+    <canvas data-testid="stage" id="stage" aria-hidden="true"></canvas>
+
+    <nav class="wordmark" aria-label="Astro Rover"><a href="./">Astro Rover</a></nav>
+
+    <!-- The gauges carry marks, not instructions: a number, a bar and a place
+         name are what a vehicle's dashboard shows. Nothing here tells the
+         player what to do. -->
+    <div class="hud" data-testid="hud">
+      <div class="readout" data-testid="score">
+        <span class="cap">Score</span>
+        <strong data-bind="score">0</strong>
+      </div>
+      <div class="readout fuel" data-testid="fuel">
+        <span class="cap">Fuel</span>
+        <div class="bar"><i data-bind="fuel" style="width: 100%"></i></div>
+      </div>
+      <div class="readout" data-testid="destination">
+        <span class="cap">Destination</span>
+        <strong data-bind="destination">The Moon</strong>
+        <div class="bar thin"><i data-bind="progress" style="width: 0%"></i></div>
+      </div>
+    </div>
+
+    <aside class="fact" data-testid="fact" hidden>
+      <strong data-bind="fact-name"></strong>
+      <span data-bind="fact-body"></span>
+    </aside>
+
+    <div class="pedals">
+      <button class="pedal brake" data-testid="pedal-brake" aria-label="Brake" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M14 6 L8 12 L14 18" fill="none" stroke="currentColor" stroke-width="2.6"
+                stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="cap">Brake</span>
+      </button>
+      <button class="pedal gas" data-testid="pedal-gas" aria-label="Gas" type="button">
+        <span class="cap">Gas</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M5 6 L11 12 L5 18 M13 6 L19 12 L13 18" fill="none" stroke="currentColor"
+                stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
+
+    <section class="screen opening" data-testid="opening">
+      <h1>Astro Rover</h1>
+      <img
+        class="hero"
+        src="./art/rover.png"
+        width="512"
+        height="341"
+        alt="A round-nosed rover on four fat wheels, an astronaut waving from under its glass dome"
+      />
+      <button class="primary" data-testid="start" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M6 4l14 8-14 8Z" fill="currentColor" />
+        </svg>
+        Start
+      </button>
+    </section>
+
+    <section class="screen over" data-testid="over" hidden>
+      <p class="verdict" data-bind="verdict"></p>
+      <p class="tally"><span class="cap">Score</span><strong data-bind="final-score">0</strong></p>
+      <p class="tally"><span class="cap">Distance</span><strong data-bind="final-distance">0 m</strong></p>
+      <p class="tally"><span class="cap">Best</span><strong data-bind="best">0</strong></p>
+      <button class="primary" data-testid="again" type="button">Again</button>
+    </section>
+
+    <p class="sr-only" data-testid="announcer" aria-live="polite"></p>
+
     <script type="module" src="./main.ts"></script>
   </body>
 </html>
