@@ -6,7 +6,10 @@ import { makeRover, step } from "../src/physics.ts";
 import { FUEL_CAPACITY, airScore, outcome } from "../src/rules.ts";
 import { makeTerrain } from "../src/terrain.ts";
 
-const PLAYERS: Record<string, (t: number, r: { vx: number; onGround: boolean }) => { gas: number; brake: number }> = {
+const PLAYERS: Record<
+  string,
+  (t: number, r: { vx: number; onGround: boolean; tiltRad: number }) => { gas: number; brake: number }
+> = {
   "idle (never touches a pedal)": () => ({ gas: 0, brake: 0 }),
   "holds gas flat out": () => ({ gas: 1, brake: 0 }),
   "feathers gas (60% duty)": (t) => ({ gas: t % 1 < 0.6 ? 1 : 0, brake: 0 }),
@@ -14,6 +17,14 @@ const PLAYERS: Record<string, (t: number, r: { vx: number; onGround: boolean }) 
     gas: r.onGround ? 1 : 0,
     brake: !r.onGround ? 0.6 : 0,
   }),
+  "pilot: levels out in the air": (t, r) =>
+    r.onGround
+      ? { gas: 1, brake: 0 }
+      : r.tiltRad > 0.08
+        ? { gas: 0, brake: 1 }
+        : r.tiltRad < -0.08
+          ? { gas: 1, brake: 0 }
+          : { gas: 0, brake: 0 },
 };
 
 for (const body of [MOON, ...BODIES.filter((b) => b.id !== MOON.id)]) {

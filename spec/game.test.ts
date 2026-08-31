@@ -193,7 +193,7 @@ describe("sensor: the course stays playable", () => {
   const drive = (
     body: (typeof BODIES)[number],
     seed: number,
-    brain: (r: { onGround: boolean }) => { gas: number; brake: number },
+    brain: (r: { onGround: boolean; tiltRad: number }) => { gas: number; brake: number },
   ): { ending: string; seconds: number; metres: number } => {
     const terrain = makeTerrain(seed, body.target, body.landmarks.length);
     const rover = makeRover(terrain);
@@ -216,13 +216,26 @@ describe("sensor: the course stays playable", () => {
 
   const flatOut = () => ({ gas: 1, brake: 0 });
   const idle = () => ({ gas: 0, brake: 0 });
+  /** Drives on the ground, and uses the pedals as attitude control in the air
+   *  to bring the chassis back level before it lands. */
+  const pilot = (r: { onGround: boolean; tiltRad: number }) => {
+    if (r.onGround) return { gas: 1, brake: 0 };
+    return r.tiltRad > 0.08 ? { gas: 0, brake: 1 } : r.tiltRad < -0.08 ? { gas: 1, brake: 0 } : { gas: 0, brake: 0 };
+  };
 
-  it("can be finished by a player who only holds the throttle", () => {
-    const runs = [1, 2, 3, 4, 5].map((seed) => drive(MOON, seed, flatOut));
+  it("can be finished by a player who levels the rover out in the air", () => {
+    const runs = [1, 2, 3, 4, 5].map((seed) => drive(MOON, seed, pilot));
     expect(runs.filter((r) => r.ending === "arrived").length).toBeGreaterThan(0);
   });
 
-  it("still lets that player lose, so holding the throttle is not a solution", () => {
+  it("gives the air controls enough authority to beat holding the throttle flat", () => {
+    const seeds = [1, 2, 3, 4, 5];
+    const skilled = seeds.filter((s) => drive(MOON, s, pilot).ending === "arrived").length;
+    const mashed = seeds.filter((s) => drive(MOON, s, flatOut).ending === "arrived").length;
+    expect(skilled).toBeGreaterThan(mashed);
+  });
+
+  it("still lets a masher lose, so holding the throttle is not a solution", () => {
     const runs = [1, 2, 3, 4, 5].map((seed) => drive(MOON, seed, flatOut));
     expect(runs.filter((r) => r.ending === "flipped").length).toBeGreaterThan(0);
   });
@@ -230,12 +243,51 @@ describe("sensor: the course stays playable", () => {
   it("always reaches an ending inside five minutes, everywhere, even doing nothing", () => {
     for (const body of BODIES) {
       for (const seed of [1, 2, 3]) {
-        for (const brain of [flatOut, idle]) {
+        for (const brain of [flatOut, idle, pilot]) {
           const run = drive(body, seed, brain);
           expect(run.ending, `${body.name} seed ${seed}`).not.toBe("never ended");
           expect(run.seconds, `${body.name} seed ${seed}`).toBeLessThanOrEqual(300);
         }
       }
     }
+  });
+});
+
+// ---------------------------------------- regression: landing inverted must end it
+// The pure-rules test above asserts outcome() correctly and still let a real bug
+// through: outcome() was right, and the tiltRad being handed to it was wrong. So
+// this drives the actual physics and asserts the ending, not the rule.
+describe("coming down on its roof ends the run", () => {
+  const fall = (angle: number) => {
+    const terrain = makeTerrain(7, MOON.target, MOON.landmarks.length);
+    const rover = makeRover(terrain);
+    rover.y = terrain.height(rover.x) + 40;
+    rover.angle = angle;
+    rover.vy = -8;
+    rover.vx = 5;
+    for (let i = 0; i < 900; i++) {
+      step(rover, { gas: 0, brake: 0 }, MOON, terrain, 1 / 120);
+      const o = outcome({
+        tiltRad: rover.tiltRad,
+        onGround: rover.onGround,
+        fuel: rover.fuel,
+        distance: rover.x,
+        target: MOON.target,
+      });
+      if (o) return o;
+    }
+    return null;
+  };
+
+  it("ends the run when the rover lands fully inverted", () => {
+    expect(fall(Math.PI)).toBe("flipped");
+  });
+
+  it("ends the run when it lands well past the point of no return", () => {
+    expect(fall(Math.PI * 0.8)).toBe("flipped");
+  });
+
+  it("does not end the run for a normal wheels-down landing", () => {
+    expect(fall(0)).toBeNull();
   });
 });

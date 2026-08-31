@@ -43,6 +43,10 @@ export function start(): void {
     fuelBox: testid("fuel"),
     destination: bind("destination"),
     progress: bind("progress"),
+    route: bind("route"),
+    marker: bind("marker"),
+    distance: bind("distance"),
+    target: bind("target"),
     factBox: testid("fact"),
     factName: bind("fact-name"),
     factBody: bind("fact-body"),
@@ -127,6 +131,17 @@ export function start(): void {
     input.brake = 0;
     cam = { x: rover.x, y: rover.y + 2, scale: targetScale() * 0.2 };
     el.destination.textContent = body.name;
+    el.target.textContent = String(body.target);
+    el.distance.textContent = "0";
+    // Ticks for the named places, so the route reads as somewhere with features
+    // rather than as a plain progress bar.
+    for (const stale of [...el.route.querySelectorAll(".route-tick")]) stale.remove();
+    for (const mark of terrain.landmarks) {
+      const tick = document.createElement("span");
+      tick.className = "route-tick";
+      tick.style.left = `${(mark.x / body.target) * 100}%`;
+      el.route.append(tick);
+    }
     el.factBox.hidden = true;
     setPhase("intro");
     say(`${body.name}. Gravity ${body.gravity} metres per second squared.`);
@@ -300,7 +315,10 @@ export function start(): void {
     const fuelPct = (rover.fuel / FUEL_CAPACITY) * 100;
     el.fuel.style.width = `${fuelPct}%`;
     el.fuelBox.dataset.low = String(fuelPct < 20);
-    el.progress.style.width = `${Math.min(100, (rover.x / body.target) * 100)}%`;
+    const along = Math.max(0, Math.min(100, (rover.x / body.target) * 100));
+    el.progress.style.width = `${along}%`;
+    el.marker.style.left = `${along}%`;
+    el.distance.textContent = String(Math.round(rover.x));
   }
 
   // ---------------------------------------------------------------- render

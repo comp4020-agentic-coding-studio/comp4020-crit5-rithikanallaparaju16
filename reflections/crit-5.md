@@ -42,6 +42,16 @@
   nothing --- forty green tests and a perfectly good-looking screenshot, and the
   game still failed its own central promise. The fix was to the world (the
   course runs downhill now), and the finding became a permanent sensor.
+- **The best moment of the week, if you want one.** A bug report --- "the game
+  still continues" when the rover lands upside down --- that 43 green tests had
+  no opinion on, because the rule was tested and the value fed to the rule was
+  not. Worth saying what that taught you about what a passing test does and does
+  not mean.
+- **And the thing it cascaded into.** Fixing it made the game unwinnable by
+  mashing, so the sensor went red. The interesting part is that the sensor was
+  asking the wrong question, not that its number was wrong: it wanted a masher to
+  win, when the brief wants a masher to *reach an ending* and a player who uses
+  the controls to win.
 - **Where judgement was actually exercised.** Two calls worth naming: always
   opening on the Moon instead of randomising the destination as asked, because a
   jump arc that changes before you have felt one reads as broken rather than

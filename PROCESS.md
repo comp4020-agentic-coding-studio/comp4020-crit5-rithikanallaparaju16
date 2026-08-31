@@ -232,3 +232,47 @@ rendered from the running game by `scripts/make-card.mjs` for the same reason.
 written down as numbers.
 
 **Commits:** [`a2787c3...f112bd1`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-rithikanallaparaju16/compare/a2787c3...f112bd1)
+
+### 6 — the flip that never ended the run
+
+> game should end when the car falls upside down. now the game still continues.
+> in the air the user can set the car in the right angle using accelerator and
+> break because it is the space. also show where the person is
+
+**What happened:** the report was right and the cause was not where the tests were
+looking. `outcome()` had a passing test for the flip rule, and `spec/game.test.ts`
+had 43 green assertions, and an upside-down rover still drove on. The tilt handed
+to `outcome()` was computed from wheel positions projected through
+`cos(angle)` --- which changes sign past vertical, so front and rear swapped,
+`atan2` returned a ground angle near PI, and `angle - groundAngle` cancelled to
+**zero**. A rover on its roof reported no lean at all.
+
+**Instead of:** patching the number, I wrote the failing test first --- one that
+drops the rover from 40 m at various angles and asserts the *ending* rather than
+the predicate. It went red on the two inverted cases and green on the wheels-down
+one, which named the bug before a line of physics changed. The fix is to sample
+the ground at a fixed left-right pair, because the ground's slope does not depend
+on which way the chassis points.
+
+**How I knew it was right, and what it cost:** the moment flips began registering,
+the playability sensor failed --- holding the throttle could no longer finish a
+run, because before this you simply kept driving on your roof. That failure was
+correct, and it is the same thing this prompt asked for next: real attitude
+control in the air. Air torque went up and its damping down, so gas lifts the
+nose and brake drops it with enough authority to save a bad launch. Then the
+sensor's *question* was wrong, not its threshold: it demanded that a masher win.
+It now asks what the brief actually asks --- a player who uses the air controls
+arrives 3 runs in 5, a masher 1 in 5, and a masher still reaches an ending. Easy
+to learn, hard to master, as a measurement.
+
+**Also:** "show where the person is" is now a route bar in the destination
+readout --- filled behind you, a tick per named crater, a lit dot for the rover,
+and `104/1200 m` under it. At 390x844 three readouts across 350 px had squeezed
+the fuel bar to nothing, so in portrait the route takes a full-width second row;
+sky is the one thing portrait has spare.
+
+**Verified:** 47 green, and Playwright drove both marking viewports to a real
+`Wheels up` ending with no console errors --- the flip ends the run in the actual
+browser, not just in the suite.
+
+**Commits:** _pending_

@@ -57,6 +57,21 @@ Learned in earlier weeks; still true whatever the brief is.
   beat the UA's `[hidden] { display: none }`, so a card meant to be hidden
   rendered as an empty bordered box for a whole run. Every class that sets
   `display` needs its own `&[hidden] { display: none }`.
+- **A green test on a pure function proves nothing about the wiring.**
+  `outcome()` decided flips correctly, and the `tiltRad` being handed to it was
+  always zero, so an upside-down rover kept driving and every test stayed green.
+  Where a rule reads computed state, test the integration as well as the rule:
+  drive the real physics and assert the *ending*, not the predicate.
+- **Never derive a terrain slope from chassis-projected sample points.**
+  `cos(angle)` changes sign past vertical, so front and rear swap, `atan2`
+  returns a ground angle near PI, and `angle - groundAngle` cancels to nothing.
+  Sample the ground at a fixed left-right pair: the ground's slope does not
+  depend on which way the vehicle is pointing.
+- **A sensor that fixes its own question is worth more than one that passes.**
+  Making flips register made the game unwinnable by mashing, and the sensor
+  failed --- correctly. The fix was not to loosen it but to ask the right thing:
+  a player who uses the controls should win, and a masher should still reach an
+  ending.
 - **Check which way source art faces before mirroring it.** The rover art faces
   *left*, so `scale(facing, 1)` drove it backwards; the correct transform was
   `scale(-facing, 1)`. Assumptions about an asset are settled by looking at a

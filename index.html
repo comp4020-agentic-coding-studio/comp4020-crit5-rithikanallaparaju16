@@ -46,7 +46,13 @@
       <div class="readout" data-testid="destination">
         <span class="cap">Destination</span>
         <strong data-bind="destination">The Moon</strong>
-        <div class="bar thin"><i data-bind="progress" style="width: 0%"></i></div>
+        <!-- Where you are on the route: the filled part is behind you, the ticks
+             are the named places, the dot is the rover. -->
+        <div class="route" data-bind="route">
+          <i class="route-fill" data-bind="progress" style="width: 0%"></i>
+          <b class="route-me" data-bind="marker" style="left: 0%"></b>
+        </div>
+        <span class="dist"><span data-bind="distance">0</span>/<span data-bind="target">0</span> m</span>
       </div>
     </div>
 

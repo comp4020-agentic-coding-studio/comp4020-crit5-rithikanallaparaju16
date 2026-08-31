@@ -136,7 +136,51 @@ html, body {
   background: var(--fuel);
   transition: width 120ms linear, background-color 300ms ease;
 }
-.bar i[data-bind="progress"] { background: var(--primary); }
+.route {
+  position: relative;
+  height: 6px;
+  min-width: 116px;
+  border-radius: var(--r-full);
+  background: color-mix(in srgb, #000 45%, transparent);
+}
+.route-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--r-full);
+  background: var(--primary);
+  transition: width 120ms linear;
+}
+.route-tick {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 12px;
+  border-radius: 1px;
+  background: var(--outline);
+  opacity: 0.65;
+  transform: translateX(-50%);
+}
+.route-me {
+  position: absolute;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  border-radius: var(--r-full);
+  background: var(--secondary);
+  border: 2px solid var(--surface-container);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 12px var(--secondary);
+  transition: left 120ms linear;
+}
+.dist {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
 .readout.fuel[data-low="true"] .bar i { background: var(--fuel-low); }
 .readout.fuel[data-low="true"] { animation: pulse 900ms ease-in-out infinite; }
 @keyframes pulse { 50% { border-color: var(--fuel-low); } }
@@ -306,11 +350,32 @@ body[data-phase="intro"] .pedals,
 body[data-phase="intro"] .hud,
 body[data-phase="over"] .pedals { visibility: hidden; }
 
+/* Portrait, 390x844: three readouts across 350px squeezed the fuel bar to
+   nothing, and the route was too short to read a position off. Sky is the one
+   thing portrait has spare, so the route gets its own full-width row. */
+@media (max-width: 560px) {
+  .hud { flex-wrap: wrap; }
+  .readout.fuel { max-width: none; }
+  .readout[data-testid="destination"] {
+    flex: 1 1 100%;
+    margin-left: 0;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 4px 10px;
+    text-align: left;
+  }
+  .readout[data-testid="destination"] .cap { grid-row: 1; }
+  .readout[data-testid="destination"] strong { grid-row: 1; }
+  .readout[data-testid="destination"] .route { grid-column: 1 / -1; }
+  .readout[data-testid="destination"] .dist { grid-column: 1 / -1; text-align: right; }
+}
+
 /* Desktop: the marking viewport is 1920x1080, so the pedals go where thumbs
    would be on a controller and the HUD stays out of the play area. */
 @media (min-width: 900px) {
   :root { --safe: 32px; }
   .pedal { width: 104px; height: 104px; }
   .pedal.gas { width: 116px; height: 116px; }
+  .route { min-width: 190px; }
   .fact { bottom: calc(var(--safe) + 148px); max-width: 380px; }
 }

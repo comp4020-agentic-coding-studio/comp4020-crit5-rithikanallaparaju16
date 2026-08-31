@@ -61,7 +61,7 @@ const MAX_SPEED = 46;
 const DRIVE = 30;
 const BRAKE_FORCE = 34;
 const ROLL_DRAG = 0.16;
-const AIR_TORQUE = 3.1;
+const AIR_TORQUE = 4.2;
 
 /** One fixed step. Mutates and returns `r`. */
 export function step(r: Rover, input: Input, body: Body, terrain: Terrain, dt: number): Rover {
@@ -69,12 +69,18 @@ export function step(r: Rover, input: Input, body: Body, terrain: Terrain, dt: n
   r.fuel = Math.max(0, r.fuel - fuelBurn(input.gas, dt));
   const powered = r.fuel > 0 ? input.gas : 0;
 
-  const xFront = r.x + Math.cos(r.angle) * (WHEELBASE / 2);
-  const xRear = r.x - Math.cos(r.angle) * (WHEELBASE / 2);
-  const yFront = terrain.height(xFront);
-  const yRear = terrain.height(xRear);
-  const support = Math.max(yFront, yRear) + RIDE_HEIGHT;
-  const groundAngle = Math.atan2(yFront - yRear, xFront - xRear);
+  // Sample the ground at a FIXED left-right pair, never at the chassis-projected
+  // wheel positions. Projecting through cos(angle) swaps left and right once the
+  // rover passes vertical, so atan2 returned a ground angle near PI and
+  // `angle - groundAngle` cancelled to zero: an upside-down rover reported no
+  // lean at all and the run never ended. The ground's slope does not depend on
+  // which way the chassis is pointing.
+  const xLeft = r.x - WHEELBASE / 2;
+  const xRight = r.x + WHEELBASE / 2;
+  const yLeft = terrain.height(xLeft);
+  const yRight = terrain.height(xRight);
+  const support = Math.max(yLeft, yRight) + RIDE_HEIGHT;
+  const groundAngle = Math.atan2(yRight - yLeft, WHEELBASE);
 
   const wasAirborne = !r.onGround;
   const touching = r.y <= support + 0.6;
@@ -116,10 +122,13 @@ export function step(r: Rover, input: Input, body: Body, terrain: Terrain, dt: n
     r.tiltRad = normalise(r.angle - Math.atan(terrain.slope(r.x)));
     r.airTime += dt;
     r.vy -= g * dt;
-    // Airborne, the pedals become attitude control -- discovered, never
-    // explained: a player holding gas off a crater rim sees the nose lift.
+    // Airborne, the pedals become attitude control -- there is no air out here
+    // to argue with, so gas pitches the nose up and brake brings it down, and
+    // that is the whole of flight. Discovered, never explained: hold gas off a
+    // crater rim and the nose lifts. Authority has to be real enough to save a
+    // bad launch, because landing on the wheels is the entire skill.
     r.angVel += (powered - input.brake) * AIR_TORQUE * dt;
-    r.angVel *= 1 - 0.35 * dt;
+    r.angVel *= 1 - 0.22 * dt;
     r.angle = normalise(r.angle + r.angVel * dt);
   }
 
