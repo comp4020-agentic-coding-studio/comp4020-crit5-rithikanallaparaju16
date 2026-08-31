@@ -1,7 +1,39 @@
 # Process overview
 
-<!-- Shape of this file: the two sections below the fold are the submission and
-     run 150-300 words for a crit week; `## Working log` at the bottom is
+## What I built
+
+A simple car game on different planets, small facts about the planet will also
+keep showing up. The game has fuel points, fuel to collect and energy points. The
+game keeps calculating distance as well.
+
+![The opening screen: a title, the rover, and one button](docs/opening-screen.png)
+
+## The moments that mattered
+
+Fixing and understanding the bug reference mattered to understand how it actually
+calculates the faults.
+
+### 1 — the game brief
+
+Gave the brief of the game and made Claude follow the files Stitch made to
+understand the design.
+
+**Commits:**
+[`198491b...a2787c3`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-rithikanallaparaju16/compare/198491b...a2787c3)
+
+### 2 — the flip that never ended the run
+
+The code was using wrong reference to understand the flip of the car. So it fixed
+that by changing the reference to which it understood what the "slope" was.
+
+**Commits:**
+[`356f383`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-rithikanallaparaju16/commit/356f383)
+
+![The run now ends when the rover lands on its roof: Wheels up, 305 m](docs/flip-ends-the-run.png)
+
+---
+
+## Working log` at the bottom is
      scratch I append to as the week goes, and is raw material to curate FROM.
      Trim it (or move it to docs/prompt-log.md) before the cutoff.
      Word counts: https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#word-counts -->

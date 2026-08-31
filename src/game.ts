@@ -113,7 +113,15 @@ export function start(): void {
   /** Where the rover sits, as a fraction down the screen. Kept clear of the
    *  pedal row at the bottom, with sky above for the jumps. */
   const horizon = (): number => H * (H > W ? 0.68 : 0.74);
-  const sx = (wx: number): number => W / 2 + (wx - cam.x) * cam.scale;
+  /**
+   * The rover sits about a third in from the left, not centred. Two reasons,
+   * and the first is the one that matters: on the opening frame it points the
+   * player rightwards before anything has moved, so "forward is that way" is
+   * read off the composition rather than explained. The second is that it puts
+   * two thirds of the screen ahead of you, which is where the craters are.
+   */
+  const anchorX = (): number => W * (H > W ? 0.34 : 0.3);
+  const sx = (wx: number): number => anchorX() + (wx - cam.x) * cam.scale;
   const sy = (wy: number): number => horizon() - (wy - cam.y) * cam.scale;
 
   // ------------------------------------------------------------------ runs
@@ -296,7 +304,7 @@ export function start(): void {
 
     // Camera: lead the rover a little so a fast run can see what is coming,
     // and follow height loosely so a big jump actually feels like altitude.
-    const lead = rover.vx * 0.42;
+    const lead = rover.vx * 0.2;
     cam.x += (rover.x + lead - cam.x) * Math.min(1, dt * 6);
     cam.y += (rover.y + 2 - cam.y) * Math.min(1, dt * 2.6);
     cam.scale += (targetScale() - cam.scale) * Math.min(1, dt * 3);
@@ -399,8 +407,8 @@ export function start(): void {
   }
 
   function drawTerrain(): void {
-    const left = cam.x - W / 2 / cam.scale - 6;
-    const right = cam.x + W / 2 / cam.scale + 6;
+    const left = cam.x - anchorX() / cam.scale - 6;
+    const right = cam.x + (W - anchorX()) / cam.scale + 6;
     const stepPx = 2;
     ctx.beginPath();
     ctx.moveTo(sx(left), H);
