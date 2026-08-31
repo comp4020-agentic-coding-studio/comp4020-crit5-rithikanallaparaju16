@@ -32,8 +32,9 @@ that drops the rover from 40 m and asserts the run *ends* rather than asking the
 rule a question I had already answered myself. It went red on the upside-down
 cases and green on a normal landing, naming the bug before any physics changed.
 Fixing it then made the game unwinnable by mashing, and the playability sensor
-went red — correctly. That is how I knew: a player who levels out in the air now
-finishes 3 runs in 5, a masher 1 in 5, and both still reach an ending.
+went red — correctly. That is how I knew the fix had landed: the sensor stayed
+red until the pedals had enough authority in the air to save a bad launch, and
+only then went green again.
 
 **Commits:**
 [`356f383`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-rithikanallaparaju16/commit/356f383)
