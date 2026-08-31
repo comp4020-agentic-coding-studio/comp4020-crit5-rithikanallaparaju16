@@ -28,9 +28,9 @@ code existed, so the build had a target instead of an opinion.
 The code was using wrong reference to understand the flip of the car. So it fixed
 that by changing the reference to which it understood what the "slope" was. The
 obvious move was to patch the tilt number. Instead a failing test came first, one
-that drops the rover from 40 m and asserts the run *ends* rather than asking the
-rule a question I had already answered myself. It went red on the upside-down
-cases and green on a normal landing, naming the bug before any physics changed.
+that drops the rover from 40 m and asserts the run *ends*. It went red on the
+upside-down cases and green on a normal landing, naming the bug before any
+physics changed.
 Fixing it then made the game unwinnable by mashing, and the playability sensor
 went red — correctly. That is how I knew the fix had landed: the sensor stayed
 red until the pedals had enough authority in the air to save a bad launch, and
@@ -43,5 +43,4 @@ only then went green again.
 
 ---
 
-The verbatim prompt-by-prompt working notes these were curated from are in
-[`docs/prompt-log.md`](docs/prompt-log.md).
+Working notes: [`docs/prompt-log.md`](docs/prompt-log.md).
